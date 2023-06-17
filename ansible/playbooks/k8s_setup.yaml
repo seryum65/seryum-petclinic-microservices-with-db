@@ -75,7 +75,7 @@
       src: ./clusterconfig-base.yml
       dest: /home/ubuntu/
   
-  - name: get gettext-base
+  - name: get gettext-base # ubuntu makinelerde envsubst komutu çalışması için gerekli.
     become: true
     apt:
       package: gettext-base
@@ -83,8 +83,10 @@
 
   - name: change controlplane_endpoint and produce the clusterconfig.yml file
     shell: |
-      export CONTROLPLANE_ENDPOINT={{ hostvars[inventory_hostname]['private_ip_address'] }}
+      export CONTROLPLANE_ENDPOINT={{ hostvars[inventory_hostname]['private_ip_address'] }} 
       envsubst < /home/ubuntu/clusterconfig-base.yml > /home/ubuntu/clusterconfig.yml
+# çalıştığımız shell de bir env variable tanımlamak için 'export' kullanırız.
+# envsubst sayesinde,export ile oluşan env variable istediğimz yere gönderebiliriz. 
 
   - name: initialize the Kubernetes cluster using kubeadm
     become: true
@@ -147,7 +149,7 @@
   - name: Deploy Nginx Ingress 
     shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.1.2/deploy/static/provider/aws/deploy.yaml
 
-  - name: Deploy AWS CSI Driver
+  - name: Deploy AWS CSI Driver # storage class kullanmamız için gerekli
     become: false
     shell: kubectl apply -k "github.com/kubernetes-sigs/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable"
 
